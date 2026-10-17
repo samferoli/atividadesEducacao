@@ -1,0 +1,3032 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pequenos Exploradores: Página de Vendas Otimizada</title>
+  
+  <!-- Basecoat CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css">
+  
+  <!-- Shell system CSS -->
+  <style>
+/* Skip artifact shell — fixed styles served beside every artifact.
+   Complements basecoat; artifacts override --accent for their own identity. */
+:root {
+  color-scheme: light dark;
+  --accent: #2563eb;
+  --accent-contrast: #ffffff;
+  --accent-text: color-mix(in srgb, var(--accent) 72%, #000);
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+  --text: #14171f;
+  --text-muted: #5b6472;
+  --border: rgba(20, 23, 31, 0.10);
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(20, 23, 31, 0.08);
+  --space: 16px;
+}
+/* Theme resolution. Without data-theme the viewer's system preference decides,
+   as it always did. With it, the artifact's own choice wins in BOTH directions:
+   a page that hardcodes one palette must not be handed the opposite set of
+   tokens by the machine it happens to be opened on. The dark values appear
+   twice because a media query cannot be folded into a selector list.
+   The attribute sits inside :where() so these blocks keep the specificity of a
+   bare :root — the page's own <style> is linked after this file and must go on
+   overriding any token it wants, exactly as it could before. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+    --bg: #101318;
+    --surface: #181c23;
+    --text: #eef1f6;
+    --text-muted: #9aa4b2;
+    --border: rgba(238, 241, 246, 0.12);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+}
+:root:where([data-theme="dark"]) {
+  color-scheme: dark;
+  --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+  --bg: #101318;
+  --surface: #181c23;
+  --text: #eef1f6;
+  --text-muted: #9aa4b2;
+  --border: rgba(238, 241, 246, 0.12);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+:root:where([data-theme="light"]) { color-scheme: light; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+
+.shell-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+.shell-section { padding: calc(var(--space) * 2) 0; }
+.shell-grid { display: grid; gap: var(--space); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.shell-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: var(--space); }
+.shell-footer { padding: 24px 0 40px; color: var(--text-muted); font-size: 13px; }
+
+.shell-hero { padding: calc(var(--space) * 3) 0 calc(var(--space) * 2); }
+.shell-hero h1 { font-size: clamp(26px, 4vw, 40px); line-height: 1.15; margin: 0 0 10px; text-wrap: balance; }
+.shell-hero p { color: var(--text-muted); max-width: 60ch; margin: 0; }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space);
+}
+
+.kpi { display: flex; flex-direction: column; gap: 4px; }
+.kpi .kpi-value { font-size: 28px; font-weight: 650; line-height: 1.1; }
+.kpi .kpi-label { font-size: 13px; color: var(--text-muted); }
+.kpi .kpi-delta { font-size: 12.5px; font-weight: 600; }
+.kpi .kpi-delta.up { color: #0a8f3c; }
+.kpi .kpi-delta.down { color: #cf3131; }
+
+table.shell-table { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.shell-table th {
+  text-align: left; font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-muted); font-weight: 600;
+}
+table.shell-table th, table.shell-table td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); }
+table.shell-table td.num, table.shell-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+
+.chart-box { width: 100%; min-height: 220px; }
+.chart-box svg { width: 100%; height: auto; display: block; }
+
+.muted { color: var(--text-muted); }
+.accent { color: var(--accent-text); }
+.shell-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-text);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shell-fade { animation: shell-fade 400ms ease both; }
+  @keyframes shell-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+
+</style>
+  
+  <!-- Google Fonts: Baloo 2 & Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Shell system JS -->
+  
+
+  <style>
+    :root {
+      --bg: #FFF9F0;
+      --surface: #FFFFFF;
+      --text: #3D2B1F;
+      --text-muted: #6B5646;
+      --border: #F0DFC8;
+      --accent: #C83B09; /* Coral vibrante com contraste > 4.5:1 com texto branco */
+      --accent-text: #962803;
+      --accent-contrast: #FFFFFF;
+      --coral-bg: #FFEAD9;
+      --yellow-bar: #FFDE59;
+      --yellow-bar-text: #422800;
+      --yellow-badge: #FFF3C4;
+      --green-soft: #EEF8E8;
+      --green-border: #BCE3B2;
+      --green-dark: #1E4620;
+      --green-accent: #2E7D32;
+      --radius-sm: 12px;
+      --radius-md: 18px;
+      --radius-lg: 24px;
+      --font-heading: 'Baloo 2', cursive, sans-serif;
+      --font-body: 'Nunito', system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, .brand-title {
+      font-family: var(--font-heading);
+      color: var(--text);
+      line-height: 1.25;
+      margin: 0 0 1rem 0;
+      font-weight: 800;
+    }
+
+    p {
+      margin: 0 0 1rem 0;
+    }
+
+    a {
+      color: var(--accent-text);
+      text-decoration: none;
+    }
+
+    /* Container base */
+    .container {
+      width: 100%;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+
+    /* Top notice bar */
+    .top-bar {
+      background-color: var(--yellow-bar);
+      color: var(--yellow-bar-text);
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 0.65rem 1rem;
+      letter-spacing: 0.01em;
+      box-shadow: 0 2px 4px rgba(66, 40, 0, 0.08);
+      position: relative;
+      z-index: 10;
+    }
+
+    /* CTA Buttons */
+    .btn-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #D9480F 0%, #BA3205 100%);
+      color: #FFFFFF !important;
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 800;
+      padding: 1.05rem 2rem;
+      border-radius: var(--radius-lg);
+      border: 2px solid #992300;
+      box-shadow: 0 8px 20px rgba(186, 50, 5, 0.28), 0 3px 0 #801C00;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      transition: all 0.2s ease-in-out;
+      text-align: center;
+      width: 100%;
+      max-width: 440px;
+      text-decoration: none;
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(186, 50, 5, 0.35), 0 4px 0 #801C00;
+      background: linear-gradient(180deg, #E04D12 0%, #A62B03 100%);
+      color: #FFFFFF !important;
+    }
+
+    .btn-cta:active {
+      transform: translateY(2px);
+      box-shadow: 0 4px 10px rgba(186, 50, 5, 0.2);
+    }
+
+    .btn-cta:focus-visible {
+      outline: 3px solid #FFDE59;
+      outline-offset: 3px;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--yellow-badge);
+      color: #4A3300;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      border: 1px solid #F5D372;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Section padding */
+    .section-wrap {
+      padding: 3.5rem 0;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .section-header h2 {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-header p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    /* Hero */
+    .hero-section {
+      padding: 3rem 0 3.5rem;
+      text-align: center;
+    }
+
+    .hero-title {
+      font-size: 2.35rem;
+      color: var(--text);
+      max-width: 860px;
+      margin: 0 auto 1.25rem;
+      letter-spacing: -0.01em;
+    }
+
+    .hero-sub {
+      font-size: 1.18rem;
+      color: var(--text-muted);
+      max-width: 740px;
+      margin: 0 auto 2rem;
+      font-weight: 600;
+    }
+
+    .price-block {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      background: #FFFFFF;
+      border: 2px dashed #E0BA8F;
+      border-radius: var(--radius-md);
+      padding: 1.2rem 2.2rem;
+      margin-bottom: 1.75rem;
+      box-shadow: 0 4px 14px rgba(61, 43, 31, 0.05);
+    }
+
+    .price-tag-sub {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .price-value {
+      font-family: var(--font-heading);
+      font-size: 3.2rem;
+      font-weight: 800;
+      color: var(--accent-text);
+      line-height: 1;
+      margin: 0.2rem 0;
+    }
+
+    .price-badge-unique {
+      background-color: var(--green-soft);
+      color: var(--green-dark);
+      border: 1px solid var(--green-border);
+      font-size: 0.85rem;
+      font-weight: 800;
+      border-radius: 9999px;
+      padding: 0.25rem 0.85rem;
+    }
+
+    .micro-copy {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-top: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem 1.2rem;
+    }
+
+    /* Hero Cover Mockup */
+    .hero-mockup-wrap {
+      margin: 3rem auto 0;
+      max-width: 720px;
+      position: relative;
+      padding: 1rem 1rem 1.5rem;
+    }
+
+    .mockup-new-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: linear-gradient(135deg, #FFF0F5 0%, #FFF8E7 100%);
+      color: #9C27B0;
+      font-family: var(--font-heading);
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 0.45rem 1.2rem;
+      border-radius: 9999px;
+      border: 2px solid #E1BEE7;
+      box-shadow: 0 4px 14px rgba(156, 39, 176, 0.12);
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-cover-stage {
+      position: relative;
+      max-width: 520px;
+      margin: 0 auto;
+      height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-main-book {
+      width: 290px;
+      height: 390px;
+      background: linear-gradient(180deg, #E0F2FE 0%, #FFF7ED 52%, #ECFDF5 100%);
+      border-radius: 26px;
+      border: 3.5px solid #F59E0B;
+      box-shadow: 0 24px 50px rgba(61, 43, 31, 0.18), inset 0 0 0 2px #FFFFFF, -12px 14px 0 #D97706;
+      padding: 1.2rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .book-spine-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 16px;
+      width: 4px;
+      background: rgba(217, 119, 6, 0.22);
+      border-radius: 2px;
+      z-index: 5;
+    }
+
+    /* Decorações da Capa do Livro */
+    .book-sky-decor {
+      position: absolute;
+      top: 10px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 1.2rem;
+      font-size: 1.1rem;
+      pointer-events: none;
+      opacity: 0.95;
+    }
+
+    .book-brand-multi {
+      font-family: var(--font-heading);
+      font-size: 1.65rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin: 0.8rem 0 0.25rem;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1px;
+      filter: drop-shadow(0 2px 0 #FFF);
+    }
+
+    .book-brand-multi span:nth-child(1) { color: #0284C7; } /* azul céu */
+    .book-brand-multi span:nth-child(2) { color: #D97706; } /* amarelo sol */
+    .book-brand-multi span:nth-child(3) { color: #16A34A; } /* verde folha */
+    .book-brand-multi span:nth-child(4) { color: #EA580C; } /* coral */
+    .book-brand-multi span:nth-child(5) { color: #DB2777; } /* rosa */
+    .book-brand-multi span:nth-child(6) { color: #0284C7; }
+    .book-brand-multi span:nth-child(7) { color: #16A34A; }
+    .book-brand-multi span:nth-child(8) { color: #EA580C; }
+
+    .book-subtitle {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #78350F;
+      margin-bottom: 0.4rem;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 0.15rem 0.6rem;
+      border-radius: 9999px;
+      border: 1px solid #FDE68A;
+    }
+
+    /* Mascote Ilustrado */
+    .book-mascot-wrap {
+      position: relative;
+      width: 130px;
+      height: 125px;
+      margin: 0.1rem auto 0;
+    }
+
+    .mascot-svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    }
+
+    /* Selo Circular 250 ATIVIDADES */
+    .stamp-250-circle {
+      position: absolute;
+      top: 50px;
+      right: 12px;
+      width: 68px;
+      height: 68px;
+      background: radial-gradient(circle, #FF6B00 0%, #D93800 100%);
+      border: 3px solid #FFE066;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-family: var(--font-heading);
+      box-shadow: 0 4px 12px rgba(217, 56, 0, 0.35);
+      z-index: 6;
+      transform: rotate(9deg);
+      line-height: 1;
+    }
+
+    .stamp-250-circle .num {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .stamp-250-circle .label {
+      font-size: 0.52rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    /* Trilha de Pegadas */
+    .footsteps-trail {
+      width: 85%;
+      margin: 0.3rem auto 0;
+      height: 24px;
+    }
+
+    .book-bottom-badge {
+      background: #FFFFFF;
+      border: 2px solid #86EFAC;
+      border-radius: 9999px;
+      padding: 0.25rem 0.8rem;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #166534;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: auto;
+      box-shadow: 0 2px 6px rgba(22, 101, 52, 0.08);
+    }
+
+    /* 3 Floating Mini-cards on Hero Cover (Coloridos e com contornos arredondados grossos) */
+    .hero-mini-card {
+      position: absolute;
+      background: #FFFFFF;
+      border: 3.5px solid #EADBCE;
+      border-radius: 18px;
+      box-shadow: 0 16px 32px rgba(61, 43, 31, 0.16);
+      padding: 0.75rem 0.85rem;
+      width: 152px;
+      z-index: 4;
+      transition: transform 0.3s ease;
+      font-size: 0.74rem;
+      text-align: left;
+    }
+
+    .hero-mini-card.c1 {
+      top: 15px;
+      left: 0px;
+      transform: rotate(-10deg);
+      border-color: #0284C7;
+      background: #F0F9FF;
+    }
+
+    .hero-mini-card.c2 {
+      bottom: 20px;
+      left: -5px;
+      transform: rotate(-6deg);
+      border-color: #16A34A;
+      background: #F0FDF4;
+    }
+
+    .hero-mini-card.c3 {
+      top: 60px;
+      right: -2px;
+      transform: rotate(8deg);
+      border-color: #EA580C;
+      background: #FFF7ED;
+    }
+
+    .hero-cover-stage:hover .hero-mini-card.c1 {
+      transform: rotate(-14deg) translateY(-6px);
+    }
+    .hero-cover-stage:hover .hero-mini-card.c2 {
+      transform: rotate(-9deg) translateX(-6px);
+    }
+    .hero-cover-stage:hover .hero-mini-card.c3 {
+      transform: rotate(12deg) translateY(-6px);
+    }
+
+    .mini-card-head {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 0.76rem;
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .mini-card-draw {
+      background: #FFFFFF;
+      border: 2px dashed #CBD5E1;
+      border-radius: 10px;
+      padding: 0.4rem;
+      text-align: center;
+      margin-top: 0.25rem;
+    }
+
+    @media (max-width: 600px) {
+      .hero-cover-stage {
+        height: 360px;
+      }
+      .hero-main-book {
+        width: 240px;
+        height: 335px;
+        padding: 1rem 0.8rem;
+      }
+      .book-brand-multi {
+        font-size: 1.35rem;
+      }
+      .stamp-250-circle {
+        width: 56px;
+        height: 56px;
+        top: 42px;
+        right: 6px;
+      }
+      .stamp-250-circle .num { font-size: 1.05rem; }
+      .stamp-250-circle .label { font-size: 0.46rem; }
+      .book-mascot-wrap {
+        width: 100px;
+        height: 96px;
+      }
+      .hero-mini-card {
+        width: 125px;
+        padding: 0.55rem 0.65rem;
+        border-width: 2.5px;
+      }
+      .hero-mini-card.c1 {
+        left: -12px;
+        top: 10px;
+      }
+      .hero-mini-card.c2 {
+        left: -15px;
+        bottom: 12px;
+      }
+      .hero-mini-card.c3 {
+        right: -12px;
+        top: 45px;
+      }
+    }
+
+    /* Interactive Preview Gallery - Explorador Interativo */
+    .preview-section {
+      background: #FAF3E8;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .preview-tabs-container {
+      position: relative;
+      margin-bottom: 1.8rem;
+    }
+
+    .preview-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem;
+    }
+
+    .preview-tab-btn {
+      background: #FFFFFF;
+      border: 2px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.98rem;
+      padding: 0.65rem 1.15rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    .preview-tab-btn:hover {
+      border-color: #D9480F;
+      color: #BA3205;
+      transform: translateY(-2px);
+    }
+
+    .preview-tab-btn.active {
+      background: #D9480F;
+      color: #FFFFFF;
+      border-color: #992300;
+      box-shadow: 0 6px 14px rgba(217, 72, 15, 0.28);
+    }
+
+    .preview-tab-btn:focus-visible {
+      outline: 3px solid #FFDE59;
+      outline-offset: 2px;
+    }
+
+    /* Navigator bar with arrows and 1 de 6 */
+    .preview-nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 840px;
+      margin: 0 auto 1.4rem;
+      padding: 0 0.5rem;
+    }
+
+    .nav-arrow-btn {
+      background: #FFFFFF;
+      border: 2px solid var(--border);
+      color: var(--text);
+      border-radius: 9999px;
+      width: 42px;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 8px rgba(61, 43, 31, 0.06);
+    }
+
+    .nav-arrow-btn:hover {
+      background: #FFF0E6;
+      border-color: #D9480F;
+      color: #962803;
+      transform: translateY(-2px);
+    }
+
+    .nav-arrow-btn:focus-visible {
+      outline: 3px solid #FFDE59;
+    }
+
+    .nav-step-indicator {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--text-muted);
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      padding: 0.35rem 1rem;
+      border-radius: 9999px;
+    }
+
+    /* Big Interactive Card Stage */
+    .preview-stage-card {
+      background: #FFFFFF;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 16px 36px rgba(61, 43, 31, 0.08);
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      align-items: center;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    @media (min-width: 768px) {
+      .preview-stage-card {
+        grid-template-columns: 1.1fr 0.9fr;
+        padding: 2.4rem;
+      }
+    }
+
+    /* Big Sheet CSS simulation - Páginas REAIS com contornos grossos e cantos arredondados */
+    .sheet-big-canvas {
+      background: #FFFFFF;
+      border: 3.5px solid #E2E8F0;
+      border-radius: 22px;
+      box-shadow: 0 12px 30px rgba(61, 43, 31, 0.08);
+      padding: 1.2rem;
+      position: relative;
+    }
+
+    .sheet-big-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.55rem 0.95rem;
+      border-radius: 14px;
+      color: #FFFFFF;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 0.86rem;
+      margin-bottom: 0.9rem;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .group-num-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 0.95rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+
+    /* Cores dos 6 grupos */
+    .theme-blue { border-color: #0284C7; }
+    .theme-blue .sheet-big-header { background: #0284C7; }
+    .theme-blue .group-num-badge { color: #0284C7; }
+
+    .theme-yellow { border-color: #D97706; }
+    .theme-yellow .sheet-big-header { background: #D97706; }
+    .theme-yellow .group-num-badge { color: #D97706; }
+
+    .theme-green { border-color: #16A34A; }
+    .theme-green .sheet-big-header { background: #16A34A; }
+    .theme-green .group-num-badge { color: #16A34A; }
+
+    .theme-coral { border-color: #EA580C; }
+    .theme-coral .sheet-big-header { background: #EA580C; }
+    .theme-coral .group-num-badge { color: #EA580C; }
+
+    .theme-purple { border-color: #7C3AED; }
+    .theme-purple .sheet-big-header { background: #7C3AED; }
+    .theme-purple .group-num-badge { color: #7C3AED; }
+
+    .theme-pink { border-color: #DB2777; }
+    .theme-pink .sheet-big-header { background: #DB2777; }
+    .theme-pink .group-num-badge { color: #DB2777; }
+
+    /* Balão de fala do mascote com instrução */
+    .mascot-speech-bubble {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: #FFFFFF;
+      border: 2.5px solid #CBD5E1;
+      border-radius: 16px;
+      padding: 0.55rem 0.85rem;
+      margin-bottom: 0.9rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      position: relative;
+    }
+
+    .mascot-bubble-avatar {
+      flex-shrink: 0;
+      width: 38px;
+      height: 38px;
+      background: #FEF3C7;
+      border: 2px solid #F59E0B;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .mascot-bubble-text {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #334155;
+      line-height: 1.35;
+      text-align: left;
+    }
+
+    .sheet-inner-drawing {
+      background: #FAFAFA;
+      border: 3px solid #E2E8F0;
+      border-radius: 16px;
+      padding: 1.1rem 0.9rem;
+      min-height: 250px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* Content on right side of big card */
+    .stage-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stage-group-tag {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: var(--accent-text);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+
+    .stage-title {
+      font-size: 1.7rem;
+      color: var(--text);
+      margin-bottom: 0.8rem;
+      line-height: 1.2;
+    }
+
+    .stage-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 1.4rem;
+      font-weight: 600;
+    }
+
+    .stage-skill-box {
+      background: #EEF8E8;
+      border: 1.5px solid #BCE3B2;
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1.1rem;
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: #1E4620;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* CSS Illustrations for the 6 tabs */
+    .art-tracados-svg {
+      width: 100%;
+      max-width: 290px;
+      height: 110px;
+    }
+
+    .art-letra-big {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+      width: 100%;
+    }
+
+    .art-letra-glyph {
+      font-size: 4.5rem;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      color: #1971C2;
+      line-height: 1;
+      border: 3px dashed #74C0FC;
+      border-radius: 16px;
+      width: 90px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #E7F5FF;
+    }
+
+    .art-letra-boxes {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .art-box-item {
+      background: #FFFFFF;
+      border: 1.5px solid #ADC6FF;
+      border-radius: 8px;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #1971C2;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .art-num-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+      width: 100%;
+    }
+
+    .art-num-badge {
+      font-size: 4.2rem;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      color: #2F9E44;
+      line-height: 1;
+    }
+
+    .art-dots-grid {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+    }
+
+    .art-big-dot {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #BCE3B2;
+      border: 3px solid #2F9E44;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .art-shapes-seq {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .art-seq-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #E599F7;
+      border: 2px solid #7048E8;
+    }
+
+    .art-seq-square {
+      width: 42px;
+      height: 42px;
+      background: #7048E8;
+      border-radius: 6px;
+    }
+
+    .art-seq-triangle {
+      width: 0;
+      height: 0;
+      border-left: 24px solid transparent;
+      border-right: 24px solid transparent;
+      border-bottom: 42px solid #F783AC;
+    }
+
+    .art-seq-blank {
+      width: 44px;
+      height: 44px;
+      border: 2.5px dashed #7048E8;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1.4rem;
+      color: #7048E8;
+      background: #F8F0FC;
+    }
+
+    .art-logic-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .art-logic-card {
+      background: #FFFFFF;
+      border: 2px solid #FFA94D;
+      border-radius: 12px;
+      width: 58px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      box-shadow: 0 4px 10px rgba(232, 89, 12, 0.08);
+    }
+
+    .art-logic-card.diff {
+      border: 2.5px dashed #E8590C;
+      background: #FFE8CC;
+    }
+
+    .art-cut-canvas {
+      width: 100%;
+      max-width: 290px;
+      border: 2.5px dashed #0CA678;
+      border-radius: 14px;
+      padding: 1.2rem;
+      background: #E6FCF5;
+      position: relative;
+    }
+
+    .art-cut-scissors {
+      position: absolute;
+      top: -14px;
+      left: 18px;
+      background: #FFFFFF;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1.5px solid #0CA678;
+      font-size: 1.1rem;
+    }
+
+    .art-cut-shapes-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      font-size: 1.7rem;
+    }
+
+    .preview-footer {
+      text-align: center;
+      margin-top: 2.6rem;
+      padding-top: 1.8rem;
+      border-top: 1px dashed var(--border);
+    }
+
+    .preview-footer-note {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Numbers ribbon */
+    .numbers-ribbon {
+      background: #FFFFFF;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 1.75rem 0;
+      box-shadow: 0 4px 16px rgba(61, 43, 31, 0.04);
+    }
+
+    .numbers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      text-align: center;
+    }
+
+    @media (min-width: 768px) {
+      .numbers-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .stat-item {
+      padding: 0.5rem;
+    }
+
+    .stat-value {
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent-text);
+      line-height: 1.1;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Pain and Solution */
+    .pain-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2.2rem 1.8rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 6px 18px rgba(61, 43, 31, 0.05);
+    }
+
+    .pain-intro {
+      font-size: 1.15rem;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .pain-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .pain-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #5A3F2E;
+    }
+
+    .pain-list li span.cross-icon {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: #FEE2E2;
+      color: #991B1B;
+      border-radius: 50%;
+      font-size: 0.85rem;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .solution-box {
+      background-color: var(--green-soft);
+      border: 2px solid var(--green-border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: 0 8px 24px rgba(46, 125, 50, 0.08);
+      position: relative;
+    }
+
+    .solution-badge {
+      display: inline-block;
+      background-color: var(--green-accent);
+      color: #FFFFFF;
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.35rem 0.9rem;
+      border-radius: 9999px;
+      margin-bottom: 0.9rem;
+      letter-spacing: 0.04em;
+    }
+
+    .solution-box p {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--green-dark);
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    /* Generic Grid Cards (Benefits, What's Inside, Bonuses) */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .cards-grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 768px) {
+      .cards-grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .feature-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: 0 4px 14px rgba(61, 43, 31, 0.04);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px rgba(61, 43, 31, 0.09);
+    }
+
+    .card-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.9rem;
+      line-height: 1;
+    }
+
+    .feature-card h3 {
+      font-size: 1.35rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    /* Bonus specific */
+    .bonus-card {
+      background: #FFFFFF;
+      border: 2px solid #F5D372;
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: 0 6px 18px rgba(255, 201, 77, 0.15);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bonus-pill {
+      align-self: flex-start;
+      background: var(--yellow-bar);
+      color: var(--yellow-bar-text);
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 0.3rem 0.85rem;
+      border-radius: 9999px;
+      margin-bottom: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .bonus-value-tag {
+      margin-top: auto;
+      padding-top: 1.25rem;
+      border-top: 1px dashed var(--border);
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--accent-text);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .anchoring-strip {
+      background: var(--coral-bg);
+      border: 1.5px solid #FFCCA3;
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--accent-text);
+    }
+
+    /* Target audience */
+    .target-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.8rem;
+      text-align: center;
+      box-shadow: 0 4px 14px rgba(61, 43, 31, 0.04);
+    }
+
+    .target-card .card-icon {
+      font-size: 2.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    /* Everything you get checklist */
+    .offer-box {
+      background: #FFFFFF;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2.2rem;
+      box-shadow: 0 10px 30px rgba(61, 43, 31, 0.07);
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    .checklist-items {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 2rem 0;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .checklist-items li {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .check-circle {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--green-accent);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .offer-pricing-summary {
+      text-align: center;
+      border-top: 2px dashed var(--border);
+      padding-top: 1.8rem;
+    }
+
+    .offer-total {
+      font-family: var(--font-heading);
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+
+    .offer-highlight-price {
+      font-size: 2.8rem;
+      color: var(--accent-text);
+      display: block;
+      line-height: 1.1;
+      margin: 0.2rem 0;
+    }
+
+    .offer-unit-cost {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--green-dark);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Guarantee Block */
+    .guarantee-box {
+      background: #FFFFFF;
+      border: 2px solid #81C784;
+      border-radius: var(--radius-lg);
+      padding: 2.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(46, 125, 50, 0.09);
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 640px) {
+      .guarantee-box {
+        flex-direction: row;
+        text-align: left;
+        gap: 2rem;
+      }
+    }
+
+    .guarantee-shield {
+      font-size: 4rem;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .guarantee-content h3 {
+      font-size: 1.6rem;
+      color: var(--green-dark);
+      margin-bottom: 0.6rem;
+    }
+
+    .guarantee-content p {
+      margin: 0;
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* FAQ Accordion */
+    .faq-list {
+      max-width: 780px;
+      margin: 0 auto;
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .faq-item {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(61, 43, 31, 0.03);
+      transition: border-color 0.2s ease;
+    }
+
+    .faq-item[open] {
+      border-color: #E2BA8F;
+    }
+
+    .faq-question {
+      padding: 1.25rem 1.4rem;
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .faq-question::-webkit-details-marker {
+      display: none;
+    }
+
+    .faq-arrow {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--accent-text);
+      transition: transform 0.2s ease;
+    }
+
+    .faq-item[open] .faq-arrow {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      padding: 0 1.4rem 1.25rem;
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      line-height: 1.6;
+    }
+
+    /* Final CTA */
+    .cta-final-box {
+      background: linear-gradient(180deg, #FFFFFF 0%, #FFF2E5 100%);
+      border: 2px solid var(--coral-bg);
+      border-radius: var(--radius-lg);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 12px 32px rgba(200, 59, 9, 0.08);
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    /* Footer */
+    .site-footer {
+      background: #3D2B1F;
+      color: #E6D8CC;
+      text-align: center;
+      padding: 2.2rem 1.25rem 6.5rem; /* extra space for sticky mobile CTA */
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    @media (min-width: 769px) {
+      .site-footer {
+        padding-bottom: 2.5rem;
+      }
+    }
+
+    /* Sticky Bottom Bar on Mobile */
+    .mobile-sticky-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 249, 240, 0.97);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 0.75rem 1rem;
+      box-shadow: 0 -4px 16px rgba(61, 43, 31, 0.12);
+      border-top: 1px solid var(--border);
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 769px) {
+      .mobile-sticky-bar {
+        display: none !important;
+      }
+    }
+
+    .sticky-info {
+      line-height: 1.2;
+    }
+
+    .sticky-title {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .sticky-price {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--accent-text);
+    }
+
+    .btn-sticky {
+      background: linear-gradient(180deg, #D9480F 0%, #BA3205 100%);
+      color: #FFFFFF !important;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 0.65rem 1.2rem;
+      border-radius: var(--radius-md);
+      border: 1px solid #992300;
+      text-decoration: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 10px rgba(186, 50, 5, 0.25);
+    }
+
+    /* Modal / Exit Intent Popup */
+    .exit-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(40, 24, 15, 0.75);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .exit-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .exit-modal-card {
+      background: #FFF9F0;
+      border: 3px solid var(--yellow-bar);
+      border-radius: var(--radius-lg);
+      padding: 2.2rem 1.8rem;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      position: relative;
+      transform: scale(0.95);
+      transition: transform 0.25s ease;
+    }
+
+    .exit-modal-overlay.active .exit-modal-card {
+      transform: scale(1);
+    }
+
+    .exit-close-btn {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.25rem;
+      border-radius: 6px;
+    }
+
+    .exit-close-btn:focus-visible {
+      outline: 2px solid var(--accent);
+    }
+
+    .modal-dismiss-link {
+      display: inline-block;
+      margin-top: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .modal-dismiss-link:hover {
+      color: var(--text);
+    }
+
+    /* Print styles */
+    @media print {
+      .top-bar, .mobile-sticky-bar, .exit-modal-overlay, .btn-cta, .btn-sticky, .video-mockup {
+        display: none !important;
+      }
+      body {
+        background: #FFFFFF;
+        color: #000000;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1) BARRA SUPERIOR FINA -->
+  <div class="top-bar" role="banner">
+    Kit digital em PDF • Entrega imediata • Garantia de 7 dias
+  </div>
+
+  <!-- 2) HERO -->
+  <header class="hero-section">
+    <div class="container">
+      <div class="badge-pill">
+        <span>✦</span> Para crianças de 4 a 6 anos • Pais, professores e educadores
+      </div>
+      
+      <h1 class="hero-title">
+        Chega de procurar atividade toda hora: 250 atividades prontas para imprimir e brincar em minutos
+      </h1>
+      
+      <p class="hero-sub">
+        O kit Pequenos Exploradores reúne 250 atividades + 4 bônus em um só lugar, para você escolher, imprimir e propor uma brincadeira com intenção em casa ou na sala de aula, sem preparar nada do zero.
+      </p>
+
+      <div class="price-block">
+        <span class="price-tag-sub">Valor do kit completo</span>
+        <span class="price-value">R$ 29,90</span>
+        <span class="price-badge-unique">✓ Pagamento único</span>
+      </div>
+
+      <div>
+        <a href="#checkout" class="btn-cta">
+          QUERO MEU KIT POR R$ 29,90
+        </a>
+      </div>
+
+      <div class="micro-copy" aria-label="Informações de garantia e pagamento">
+        <span>✓ Pagamento único</span>
+        <span>✓ Sem mensalidade</span>
+        <span>✓ Acesso imediato</span>
+        <span>✓ Garantia de 7 dias</span>
+      </div>
+
+      <!-- Mockup Visual Estático do Kit: Capa ilustrada desenhada em CSS + 3 mini-cartões flutuando -->
+      <div class="hero-mockup-wrap" aria-label="Mockup visual do kit Pequenos Exploradores">
+        <div class="mockup-new-tag">
+          Visual novo: mascote, cores vibrantes e certificado 🎨
+        </div>
+
+        <div class="hero-cover-stage">
+          <!-- Livro / Capa ilustrada em CSS -->
+          <div class="hero-main-book">
+            <div class="book-spine-line" aria-hidden="true"></div>
+
+            <!-- Nuvens, balão, estrelas -->
+            <div class="book-sky-decor" aria-hidden="true">
+              <span>☁️ ✨</span>
+              <span>🎈</span>
+              <span>⭐ ☁️</span>
+            </div>
+
+            <!-- Selo circular 250 ATIVIDADES -->
+            <div class="stamp-250-circle" aria-label="Selo 250 atividades">
+              <span class="num">250</span>
+              <span class="label">ATIVIDADES</span>
+            </div>
+
+            <!-- Título Pequenos Exploradores em letras arredondadas multicoloridas -->
+            <div class="book-brand-multi" aria-label="Pequenos Exploradores">
+              <span>P</span><span>e</span><span>q</span><span>u</span><span>e</span><span>n</span><span>o</span><span>s</span>&nbsp;<span>E</span><span>x</span><span>p</span><span>l</span><span>o</span><span>r</span><span>a</span><span>d</span><span>o</span><span>r</span><span>e</span><span>s</span>
+            </div>
+
+            <div class="book-subtitle">Atividades Prontas Para Imprimir &amp; Brincar</div>
+
+            <!-- Mascote explorador com chapéu de safári, mochila e lupa -->
+            <div class="book-mascot-wrap" aria-hidden="true">
+              <svg class="mascot-svg" viewBox="0 0 130 125" fill="none">
+                <!-- Mochila atrás -->
+                <rect x="24" y="55" width="22" height="34" rx="6" fill="#EA580C" stroke="#9A3412" stroke-width="2.5" />
+                <rect x="84" y="55" width="22" height="34" rx="6" fill="#EA580C" stroke="#9A3412" stroke-width="2.5" />
+
+                <!-- Corpo / Roupinha de Safári -->
+                <ellipse cx="65" cy="88" rx="28" ry="24" fill="#0284C7" stroke="#0369A1" stroke-width="2.5" />
+                <!-- Cinto e bolsos -->
+                <rect x="45" y="86" width="40" height="6" rx="2" fill="#D97706" />
+                <rect x="52" y="94" width="10" height="10" rx="3" fill="#38BDF8" stroke="#0284C7" stroke-width="1.5" />
+                <rect x="68" y="94" width="10" height="10" rx="3" fill="#38BDF8" stroke="#0284C7" stroke-width="1.5" />
+
+                <!-- Rosto alegre -->
+                <circle cx="65" cy="46" r="23" fill="#FED7AA" stroke="#EA580C" stroke-width="2.5" />
+                <!-- Olhinhos -->
+                <circle cx="57" cy="45" r="3.2" fill="#334155" />
+                <circle cx="73" cy="45" r="3.2" fill="#334155" />
+                <circle cx="58" cy="43.5" r="1.2" fill="#FFF" />
+                <circle cx="74" cy="43.5" r="1.2" fill="#FFF" />
+                <!-- Bochechas rosadas -->
+                <ellipse cx="52" cy="51" rx="3.5" ry="2.2" fill="#F472B6" opacity="0.8" />
+                <ellipse cx="78" cy="51" rx="3.5" ry="2.2" fill="#F472B6" opacity="0.8" />
+                <!-- Sorriso -->
+                <path d="M 59 52 Q 65 59 71 52" stroke="#9A3412" stroke-width="2.5" stroke-linecap="round" fill="none" />
+
+                <!-- Chapéu de Safári com aba -->
+                <ellipse cx="65" cy="27" rx="33" ry="8" fill="#FBBF24" stroke="#D97706" stroke-width="2.5" />
+                <path d="M 44 27 C 44 14 53 10 65 10 C 77 10 86 14 86 27 Z" fill="#FCD34D" stroke="#D97706" stroke-width="2.5" />
+                <!-- Faixa do chapéu -->
+                <path d="M 45 25 Q 65 29 85 25" stroke="#16A34A" stroke-width="3.5" stroke-linecap="round" fill="none" />
+                <!-- Distintivo estrela no chapéu -->
+                <polygon points="65,16 67,20 71,20 68,23 69,27 65,24 61,27 62,23 59,20 63,20" fill="#EA580C" />
+
+                <!-- Lupa na mãozinha -->
+                <!-- Bracinho -->
+                <path d="M 78 75 Q 92 68 96 56" stroke="#FED7AA" stroke-width="7" stroke-linecap="round" />
+                <!-- Haste da lupa -->
+                <line x1="96" y1="56" x2="108" y2="42" stroke="#78350F" stroke-width="4.5" stroke-linecap="round" />
+                <!-- Aro da lupa -->
+                <circle cx="112" cy="36" r="14" fill="#E0F2FE" stroke="#F59E0B" stroke-width="3.5" />
+                <ellipse cx="109" cy="33" rx="5" ry="3" fill="#FFF" opacity="0.75" />
+              </svg>
+            </div>
+
+            <!-- Trilha de pegadas pontilhada -->
+            <svg class="footsteps-trail" viewBox="0 0 200 24" fill="none" aria-hidden="true">
+              <path d="M 15 14 Q 55 5 100 14 T 185 12" stroke="#F59E0B" stroke-width="2.5" stroke-dasharray="4 4" fill="none" />
+              <circle cx="35" cy="11" r="2" fill="#D97706" />
+              <circle cx="70" cy="9" r="2" fill="#D97706" />
+              <circle cx="115" cy="14" r="2" fill="#D97706" />
+              <circle cx="155" cy="12" r="2" fill="#D97706" />
+            </svg>
+
+            <!-- Tag rodapé do livro -->
+            <div class="book-bottom-badge">
+              <span>🎓</span> Certificado de Explorador Incluso!
+            </div>
+          </div>
+
+          <!-- Mini-cartão 1: Traçados (colorido com contornos arredondados grossos) -->
+          <div class="hero-mini-card c1" aria-hidden="true">
+            <div class="mini-card-head" style="color: #0284C7;">
+              <span style="font-size: 1rem;">✏️</span> Traçados
+            </div>
+            <div class="mini-card-draw">
+              <div style="font-size: 0.65rem; color: #0369A1; font-weight: 800;">Até a cenoura!</div>
+              <div style="border-bottom: 2.5px dashed #0284C7; margin: 6px 0;"></div>
+              <span style="font-size: 0.62rem; color: #16A34A; font-weight: 800;">★ Início ➔ Chegada</span>
+            </div>
+          </div>
+
+          <!-- Mini-cartão 2: Números (colorido com contornos arredondados grossos) -->
+          <div class="hero-mini-card c2" aria-hidden="true">
+            <div class="mini-card-head" style="color: #16A34A;">
+              <span style="font-size: 1rem;">🔢</span> Números
+            </div>
+            <div class="mini-card-draw">
+              <div style="font-size: 0.75rem;">🐟 🐟 🐟 🐟</div>
+              <span style="font-size: 0.62rem; color: #15803D; font-weight: 800;">Circule o número!</span>
+            </div>
+          </div>
+
+          <!-- Mini-cartão 3: Formas & Lógica (colorido com contornos arredondados grossos) -->
+          <div class="hero-mini-card c3" aria-hidden="true">
+            <div class="mini-card-head" style="color: #EA580C;">
+              <span style="font-size: 1rem;">🔺</span> Sequências
+            </div>
+            <div class="mini-card-draw">
+              <div style="font-size: 0.8rem;">⭕ 🟦 ⭕ ❓</div>
+              <span style="font-size: 0.62rem; color: #C2410C; font-weight: 800;">Padrões visuais</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3) FAIXA DE NÚMEROS (PROVA SOCIAL ESTRUTURAL) -->
+  <section class="numbers-ribbon" aria-label="Destaques do material">
+    <div class="container">
+      <div class="numbers-grid">
+        <div class="stat-item">
+          <div class="stat-value">250</div>
+          <div class="stat-label">atividades práticas</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">6</div>
+          <div class="stat-label">grupos de propostas</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">4</div>
+          <div class="stat-label">bônus inclusos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">&lt; R$ 0,12</div>
+          <div class="stat-label">por atividade</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4) DOR E SOLUÇÃO -->
+  <section class="section-wrap">
+    <div class="container">
+      <div class="section-header">
+        <h2>Você conhece essa cena?</h2>
+        <p>
+          Fim de tarde, a criança pede uma brincadeira e você abre o celular para procurar atividade para imprimir. Vinte minutos depois, você ainda está rolando a tela e baixando arquivos soltos, sem saber se aquilo faz sentido para a idade.
+        </p>
+      </div>
+
+      <div class="pain-card">
+        <ul class="pain-list">
+          <li>
+            <span class="cross-icon" aria-hidden="true">✕</span>
+            <span>Horas perdidas procurando em sites, Pinterest e grupos de mensagens</span>
+          </li>
+          <li>
+            <span class="cross-icon" aria-hidden="true">✕</span>
+            <span>Ideias repetidas ou totalmente fora da faixa etária de 4 a 6 anos</span>
+          </li>
+          <li>
+            <span class="cross-icon" aria-hidden="true">✕</span>
+            <span>Material espalhado no celular ou computador, sem organização nem sequência lógica</span>
+          </li>
+          <li>
+            <span class="cross-icon" aria-hidden="true">✕</span>
+            <span>A sensação frustrante de acabar propondo sempre a mesma brincadeira de improviso</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="solution-box">
+        <span class="solution-badge">A SOLUÇÃO DEFINITIVA</span>
+        <p>
+          O Pequenos Exploradores resolve isso com um único kit: 250 atividades organizadas em 6 grupos, prontas para imprimir quando você precisar. Você escolhe a página, imprime e começa. Sem busca, sem preparação, sem improviso.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5) BENEFÍCIOS -->
+  <section class="section-wrap" style="background-color: #FAF2E6;">
+    <div class="container">
+      <div class="section-header">
+        <h2>Por que este kit transforma a sua rotina</h2>
+        <p>Pensado para trazer praticidade para você e estímulos genuínos para as crianças.</p>
+      </div>
+
+      <div class="cards-grid cards-grid-3">
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">⏱️</div>
+          <h3>Economia de tempo real</h3>
+          <p>Abra o PDF, escolha uma página e imprima. O que levava 30 minutos de busca agora leva 2.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">🧩</div>
+          <h3>Variedade para todo humor</h3>
+          <p>Traçados, letras, números, formas, lógica e brincadeiras criativas: sempre há uma proposta que combina com o momento.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">💛</div>
+          <h3>Mais tempo junto</h3>
+          <p>Menos tela para você procurar, mais presença para brincar, conversar e observar a criança.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">🏫</div>
+          <h3>Funciona em casa e na escola</h3>
+          <p>Pais usam nos momentos de descoberta; professores usam como apoio ao planejamento.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">🖨️</div>
+          <h3>Imprima só o que precisar</h3>
+          <p>Nada de imprimir tudo. Selecione as páginas daquele dia e pronto.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">📈</div>
+          <h3>Progressão natural</h3>
+          <p>Do primeiro traçado aos desafios de observação, as atividades acompanham o desenvolvimento.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">🎨</div>
+          <h3>Visual que convida a brincar</h3>
+          <p>Mascote explorador, cores vibrantes e instruções em balões de fala em todas as páginas.</p>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 2.8rem;">
+        <a href="#checkout" class="btn-cta">
+          QUERO ESSA VARIEDADE NO MEU DIA A DIA
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6) O QUE TEM DENTRO -->
+  <section class="section-wrap">
+    <div class="container">
+      <div class="section-header">
+        <h2>O que tem dentro do kit principal</h2>
+        <p>250 propostas ricas e pedagógicas distribuídas em 6 grupos temáticos essenciais:</p>
+      </div>
+
+      <div class="cards-grid cards-grid-3">
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">✏️</div>
+          <h3>Traçados e coordenação</h3>
+          <p>Caminhos, contornos e grafismos para exercitar o controle do lápis de forma lúdica.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">🔤</div>
+          <h3>Letras e linguagem</h3>
+          <p>Reconhecimento visual e aproximação lúdica com letras e palavras.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">🔢</div>
+          <h3>Números e quantidades</h3>
+          <p>Contagem, associação e primeiras descobertas sobre o universo dos números.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">🔺</div>
+          <h3>Formas e sequências</h3>
+          <p>Padrões, cores, figuras e percepção visual em desafios divertidos.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">🧠</div>
+          <h3>Atenção e lógica</h3>
+          <p>Comparações, observação e resolução de situações simples.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon" aria-hidden="true">✂️</div>
+          <h3>Brincadeiras criativas</h3>
+          <p>Recortes, combinações e momentos de criar e experimentar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEÇÃO INTERATIVA: ESPIE O MATERIAL POR DENTRO -->
+  <section class="section-wrap preview-section" id="previewMaterial">
+    <div class="container">
+      <div class="section-header">
+        <h2>Espie o material por dentro</h2>
+        <p>Clique em cada grupo e veja um exemplo real do que você vai imprimir.</p>
+      </div>
+
+      <!-- Abas interativas para os 6 grupos -->
+      <div class="preview-tabs-container">
+        <div class="preview-tabs" role="tablist" aria-label="Grupos de atividades do kit">
+          <button class="preview-tab-btn active" role="tab" id="tabBtn-0" aria-selected="true" data-index="0">
+            ✏️ Traçados e coordenação
+          </button>
+          <button class="preview-tab-btn" role="tab" id="tabBtn-1" aria-selected="false" data-index="1">
+            🔤 Letras e linguagem
+          </button>
+          <button class="preview-tab-btn" role="tab" id="tabBtn-2" aria-selected="false" data-index="2">
+            🔢 Números e quantidades
+          </button>
+          <button class="preview-tab-btn" role="tab" id="tabBtn-3" aria-selected="false" data-index="3">
+            🔺 Formas e sequências
+          </button>
+          <button class="preview-tab-btn" role="tab" id="tabBtn-4" aria-selected="false" data-index="4">
+            🧠 Atenção e lógica
+          </button>
+          <button class="preview-tab-btn" role="tab" id="tabBtn-5" aria-selected="false" data-index="5">
+            ✂️ Brincadeiras criativas
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Navegação: Anterior / Próxima e Contador -->
+      <div class="preview-nav-bar">
+        <button class="nav-arrow-btn" id="prevSlideBtn" aria-label="Ver grupo anterior">←</button>
+        <div class="nav-step-indicator" id="navIndicator">1 de 6</div>
+        <button class="nav-arrow-btn" id="nextSlideBtn" aria-label="Ver próximo grupo">→</button>
+      </div>
+
+      <!-- Cartão Grande do Explorador com Transição -->
+      <div class="preview-stage-card" id="stageCard" role="region" aria-live="polite">
+        <!-- Lado Esquerdo: Página simulada em CSS -->
+        <div class="sheet-big-canvas theme-blue" id="stageCanvas">
+          <!-- O conteúdo visual dinâmico é atualizado via JS / Templates -->
+        </div>
+
+        <!-- Lado Direito: Informações pedagógicas -->
+        <div class="stage-info">
+          <span class="stage-group-tag" id="stageGroupTag">GRUPO 1 • AZUL</span>
+          <h3 class="stage-title" id="stageTitle">Caminho do Explorador até a Cenoura</h3>
+          <p class="stage-desc" id="stageDesc">Caminho pontilhado ondulado de um explorador até uma cenoura, com estrela amarela no início, rótulos e espaço livre para desenho.</p>
+          <div class="stage-skill-box">
+            <span>🎯</span>
+            <div><strong>A criança treina:</strong> <span id="stageSkill">controle do lápis</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rodapé da seção interativa -->
+      <div class="preview-footer">
+        <p class="preview-footer-note">
+          Essas são apenas 6 das 250 propostas do kit
+        </p>
+        <a href="#checkout" class="btn-cta">
+          GOSTEI, QUERO RECEBER O KIT
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7) BÔNUS -->
+  <section class="section-wrap" style="background-color: #FFF3E0;">
+    <div class="container">
+      <div class="section-header">
+        <h2>Você veio pelas 250 atividades. Fica pelos 4 bônus que facilitam tudo.</h2>
+        <p>As atividades resolvem o que fazer. Os 4 bônus exclusivos organizam a rotina, economizam na impressão e trazem desafios práticos para o dia a dia. Inclusos sem custo adicional.</p>
+      </div>
+
+      <div class="cards-grid cards-grid-2">
+        <!-- BÔNUS 1 -->
+        <div class="bonus-card">
+          <span class="bonus-pill">BÔNUS 1</span>
+          <div class="card-icon" aria-hidden="true">🗓️</div>
+          <h3>Cartões de Rotina Visual para Imprimir</h3>
+          <p>Cartões ilustrados para montar com a criança a rotina do dia: hora de brincar, de aprender, de comer e de descansar. Mais previsibilidade para a criança e menos resistência nas transições.</p>
+          <div class="bonus-value-tag">
+            <span>✓</span> Valor sugerido: R$ 29,90 • GRÁTIS no kit
+          </div>
+        </div>
+
+        <!-- BÔNUS 2 -->
+        <div class="bonus-card">
+          <span class="bonus-pill">BÔNUS 2</span>
+          <div class="card-icon" aria-hidden="true">✂️</div>
+          <h3>Lista de Materiais que Você Já Tem em Casa</h3>
+          <p>Checklist de itens simples, como tampinhas, botões, caixas e folhas, para transformar as atividades impressas em brincadeiras completas sem gastar mais nada.</p>
+          <div class="bonus-value-tag">
+            <span>✓</span> Valor sugerido: R$ 29,90 • GRÁTIS no kit
+          </div>
+        </div>
+
+        <!-- BÔNUS 3 -->
+        <div class="bonus-card">
+          <span class="bonus-pill">BÔNUS 3</span>
+          <div class="card-icon" aria-hidden="true">⚡</div>
+          <h3>30 Desafios de 5 Minutos</h3>
+          <p>Propostas rápidas de atenção e lógica para os momentos de espera: antes do jantar, no consultório, no carro. Uma atividade completa em poucos minutos.</p>
+          <div class="bonus-value-tag">
+            <span>✓</span> Valor sugerido: R$ 29,90 • GRÁTIS no kit
+          </div>
+        </div>
+
+        <!-- BÔNUS 4 -->
+        <div class="bonus-card">
+          <span class="bonus-pill">BÔNUS 4</span>
+          <div class="card-icon" aria-hidden="true">🏅</div>
+          <h3>Kit de Recompensas (Adesivos, Medalhas e Diplomas)</h3>
+          <p>Medalhas coloridas, adesivos de incentivo e diplomas de conquista prontos para imprimir e comemorar cada nova etapa vencida pelo pequeno explorador.</p>
+          <div class="bonus-value-tag">
+            <span>✓</span> Valor sugerido: R$ 29,90 • GRÁTIS no kit
+          </div>
+        </div>
+      </div>
+
+      <div class="anchoring-strip">
+        Se cada bônus fosse vendido separadamente, somariam R$ 119,60. Nesta oferta, vão inclusos no kit.
+      </div>
+    </div>
+  </section>
+
+  <!-- 8) PARA QUEM É -->
+  <section class="section-wrap">
+    <div class="container">
+      <div class="section-header">
+        <h2>Para quem foi criado o Pequenos Exploradores?</h2>
+        <p>Um material flexível, respeitoso e desenvolvido com rigor para quem educa e cuida:</p>
+      </div>
+
+      <div class="cards-grid cards-grid-3">
+        <div class="target-card">
+          <div class="card-icon" aria-hidden="true">👨‍👩‍👧</div>
+          <h3>Pais e responsáveis</h3>
+          <p>Que querem mais ideias prontas para momentos de descoberta em casa.</p>
+        </div>
+
+        <div class="target-card">
+          <div class="card-icon" aria-hidden="true">👩‍🏫</div>
+          <h3>Professores e pedagogos</h3>
+          <p>Que procuram propostas complementares e apoio ao planejamento.</p>
+        </div>
+
+        <div class="target-card">
+          <div class="card-icon" aria-hidden="true">🤝</div>
+          <h3>Avós, babás e cuidadores</h3>
+          <p>Que precisam de atividades variadas e simples de preparar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9) TUDO QUE VOCÊ RECEBE (CHECKLIST) -->
+  <section class="section-wrap" id="checkout">
+    <div class="container">
+      <div class="section-header">
+        <h2>Resumo completo da sua compra</h2>
+        <p>Veja tudo que estará liberado para download no momento da aprovação:</p>
+      </div>
+
+      <div class="offer-box">
+        <ul class="checklist-items">
+          <li>
+            <span class="check-circle" aria-hidden="true">✓</span>
+            <span>250 atividades infantis em 6 grupos coloridos (PDF principal)</span>
+          </li>
+          <li>
+            <span class="check-circle" aria-hidden="true">✓</span>
+            <span>Certificado de Grande Explorador para imprimir</span>
+          </li>
+          <li>
+            <span class="check-circle" aria-hidden="true">✓</span>
+            <span>Bônus 1: Cartões de Rotina Visual</span>
+          </li>
+          <li>
+            <span class="check-circle" aria-hidden="true">✓</span>
+            <span>Bônus 2: Lista de Materiais de Casa</span>
+          </li>
+          <li>
+            <span class="check-circle" aria-hidden="true">✓</span>
+            <span>Bônus 3: 30 Desafios de 5 Minutos</span>
+          </li>
+          <li>
+            <span class="check-circle" aria-hidden="true">✓</span>
+            <span>Bônus 4: Kit de Recompensas (adesivos, medalhas e diplomas)</span>
+          </li>
+        </ul>
+
+        <div class="offer-pricing-summary">
+          <div class="offer-total">Kit completo + 4 bônus por</div>
+          <span class="offer-highlight-price">R$ 29,90</span>
+          <div style="font-weight: 700; color: var(--text-muted); margin-bottom: 0.35rem;">pagamento único</div>
+          <div class="offer-unit-cost">Menos de R$ 0,12 por atividade, com bônus inclusos</div>
+
+          <a href="#checkout" class="btn-cta" style="margin-top: 0.5rem;" onclick="handleCheckoutClick(event)">
+            GARANTIR MEU KIT AGORA
+          </a>
+
+          <div class="micro-copy" style="margin-top: 1rem;">
+            <span>✓ Acesso digital imediato</span>
+            <span>✓ Sem cobrança recorrente</span>
+            <span>✓ Compra 100% segura</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10) GARANTIA -->
+  <section class="section-wrap">
+    <div class="container">
+      <div class="guarantee-box">
+        <div class="guarantee-shield" aria-hidden="true">🛡️</div>
+        <div class="guarantee-content">
+          <h3>Risco zero por 7 dias</h3>
+          <p>
+            Use o material, imprima e teste com as crianças. Se não gostar por qualquer motivo, você solicita 100% do valor de volta em até 7 dias. Sem perguntas, sem burocracia.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11) FAQ (ACCORDION) -->
+  <section class="section-wrap" style="background-color: #FAF4EB;">
+    <div class="container">
+      <div class="section-header">
+        <h2>Perguntas frequentes</h2>
+        <p>Tire todas as suas dúvidas antes de garantir o seu material:</p>
+      </div>
+
+      <div class="faq-list">
+        <!-- Pergunta 1 -->
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Preciso de materiais especiais ou caros?</span>
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </summary>
+          <div class="faq-answer">
+            Não. A grande maioria das atividades usa lápis, borracha, tesoura e cola. Quando uma proposta pede algo a mais, são itens simples que você já tem em casa, como tampinhas ou botões.
+          </div>
+        </details>
+
+        <!-- Pergunta 2 -->
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Posso usar com mais de uma criança?</span>
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </summary>
+          <div class="faq-answer">
+            Sim. Você pode imprimir quantas cópias precisar para seus filhos ou para a sua turma. O que não pode é revender ou redistribuir os arquivos.
+          </div>
+        </details>
+
+        <!-- Pergunta 3 -->
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>As atividades são coloridas?</span>
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </summary>
+          <div class="faq-answer">
+            A maioria foi pensada para a criança colorir e completar, o que faz parte da brincadeira. Você pode imprimir em preto e branco sem perder nada da experiência.
+          </div>
+        </details>
+
+        <!-- Pergunta 4 -->
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Em quanto tempo recebo o material?</span>
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </summary>
+          <div class="faq-answer">
+            Assim que o pagamento é confirmado, o acesso aos PDFs é liberado automaticamente. Em geral, leva poucos minutos.
+          </div>
+        </details>
+
+        <!-- Pergunta 5 -->
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>O kit alfabetiza meu filho?</span>
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </summary>
+          <div class="faq-answer">
+            As atividades preparam o caminho: coordenação, reconhecimento de letras e números. São um apoio lúdico ao desenvolvimento, não um método completo de alfabetização.
+          </div>
+        </details>
+
+        <!-- Pergunta 6 -->
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Serve para crianças fora da faixa de 4 a 6 anos?</span>
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </summary>
+          <div class="faq-answer">
+            As propostas foram desenhadas para essa faixa, mas crianças um pouco mais novas ou mais velhas podem aproveitar conforme o ritmo, sempre com acompanhamento de um adulto.
+          </div>
+        </details>
+
+        <!-- Pergunta 7 -->
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Como funciona a garantia de 7 dias?</span>
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </summary>
+          <div class="faq-answer">
+            Se o material não atender às suas expectativas, você solicita o reembolso integral em até 7 dias após a compra. Sem perguntas e sem burocracia.
+          </div>
+        </details>
+
+        <!-- Pergunta 8 -->
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Posso usar na escola onde trabalho?</span>
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </summary>
+          <div class="faq-answer">
+            Sim. Professores podem usar as atividades com suas turmas. A licença é individual: não permite compartilhar os arquivos com outros profissionais.
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12) CTA FINAL -->
+  <section class="section-wrap">
+    <div class="container">
+      <div class="cta-final-box">
+        <h2 style="font-size: 2.15rem; margin-bottom: 0.8rem;">
+          Mais ideias prontas. Menos tempo procurando. Mais momentos de descoberta juntos.
+        </h2>
+        <p style="font-size: 1.15rem; color: var(--text-muted); font-weight: 600; margin-bottom: 2rem;">
+          Por R$ 29,90, você leva 250 atividades + 4 bônus para começar a usar hoje mesmo.
+        </p>
+
+        <a href="#checkout" class="btn-cta" style="font-size: 1.25rem;">
+          GARANTIR MEU KIT POR R$ 29,90
+        </a>
+
+        <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted); margin-top: 1.25rem;">
+          Acesso digital após a confirmação do pagamento • Garantia de 7 dias
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13) POPUP DE SAÍDA (EXIT INTENT) -->
+  <div class="exit-modal-overlay" id="exitModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="exit-modal-card">
+      <button class="exit-close-btn" id="closeModalBtn" aria-label="Fechar janela">✕</button>
+      
+      <div class="badge-pill" style="margin-bottom: 0.85rem; font-size: 0.8rem;">
+        ✦ Oportunidade Única ✦
+      </div>
+
+      <h3 id="modalTitle" style="font-size: 1.6rem; color: var(--text); margin-bottom: 0.8rem;">
+        ✦ ESPERA! Veja tudo o que você leva ✦
+      </h3>
+
+      <p style="font-size: 1rem; color: var(--text-muted); font-weight: 600; margin-bottom: 1rem; line-height: 1.5;">
+        250 atividades para imprimir + 4 bônus especiais já inclusos, sem custo extra: 
+        <strong>Cartões de Rotina Visual • Lista de Materiais • 30 Desafios de 5 Minutos • Kit de Recompensas</strong>
+      </p>
+
+      <div style="background: #FFFFFF; border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 0.75rem; margin-bottom: 1.4rem;">
+        <span style="font-size: 0.9rem; font-weight: 700; color: var(--text-muted);">Kit completo por apenas</span>
+        <div style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 800; color: var(--accent-text); line-height: 1.1;">
+          R$ 29,90
+        </div>
+      </div>
+
+      <a href="#checkout" class="btn-cta" id="modalCtaBtn" style="font-size: 1.1rem; padding: 0.9rem 1.4rem;">
+        QUERO MEU KIT + 4 BÔNUS
+      </a>
+
+      <div>
+        <button type="button" class="modal-dismiss-link" id="dismissModalBtn" style="background: none; border: none; padding: 0;">
+          Não, obrigado. Prefiro continuar procurando.
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14) RODAPÉ -->
+  <footer class="site-footer">
+    <div class="container">
+      <p style="margin: 0;">
+        Pequenos Exploradores • 250 atividades infantis + 4 bônus • Produto digital em PDF • © 2026
+      </p>
+    </div>
+  </footer>
+
+  <!-- BARRA DE CTA FIXA NO RODAPÉ EM MOBILE -->
+  <div class="mobile-sticky-bar" aria-label="Barra de compra rápida">
+    <div class="sticky-info">
+      <div class="sticky-title">Pequenos Exploradores</div>
+      <div class="sticky-price">R$ 29,90 <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">(único)</span></div>
+    </div>
+    <a href="#checkout" class="btn-sticky">
+      QUERO O KIT
+    </a>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Exit intent modal handling
+      const modal = document.getElementById('exitModal');
+      const closeBtn = document.getElementById('closeModalBtn');
+      const dismissBtn = document.getElementById('dismissModalBtn');
+      const modalCtaBtn = document.getElementById('modalCtaBtn');
+      let popupShown = false;
+
+      function showModal() {
+        if (popupShown) return;
+        // Don't show if user already dismissed it this session
+        if (sessionStorage.getItem('pd_exit_shown') === 'true') return;
+        
+        popupShown = true;
+        sessionStorage.setItem('pd_exit_shown', 'true');
+        modal.classList.add('active');
+      }
+
+      function hideModal() {
+        modal.classList.remove('active');
+      }
+
+      closeBtn.addEventListener('click', hideModal);
+      dismissBtn.addEventListener('click', hideModal);
+      modalCtaBtn.addEventListener('click', hideModal);
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          hideModal();
+        }
+      });
+
+      // Desktop: mouseleave detection
+      document.addEventListener('mouseleave', (e) => {
+        if (e.clientY <= 0 && !popupShown) {
+          showModal();
+        }
+      });
+
+      // Mobile: trigger on scroll depth (over 65%) + timer (after 30s)
+      let mobileTimer = setTimeout(() => {
+        if (window.innerWidth <= 768 && !popupShown) {
+          showModal();
+        }
+      }, 35000);
+
+      let scrollTriggered = false;
+      window.addEventListener('scroll', () => {
+        if (scrollTriggered || popupShown) return;
+        const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (totalHeight > 0) {
+          const currentScroll = window.scrollY;
+          if (currentScroll / totalHeight > 0.75) {
+            scrollTriggered = true;
+            // Short delay after scrolling deep
+            setTimeout(() => {
+              if (window.innerWidth <= 768 && !popupShown) {
+                showModal();
+              }
+            }, 800);
+          }
+        }
+      }, { passive: true });
+
+      // Explorador Interativo: Dados fiéis dos 6 grupos conforme especificações do produto
+      const previewData = [
+        {
+          groupName: "GRUPO 1 • AZUL",
+          themeClass: "theme-blue",
+          groupNum: "1",
+          groupLabel: "Traçados e Coordenação",
+          instruction: "Ajude o explorador a levar a cenoura! Trace com firmeza sem tirar o lápis do caminho pontilhado.",
+          title: "Caminho Ondulado até a Cenoura",
+          desc: "Caminho pontilhado ondulado de um explorador até uma cenoura, com estrela amarela no início, rótulos INÍCIO e CHEGADA, e banner coral 'AGORA É SUA VEZ!' para desenhar.",
+          skill: "controle do lápis",
+          visualHtml: `
+            <div style="width: 100%; position: relative;">
+              <!-- Caminho pontilhado ondulado com estrela e rótulos -->
+              <svg viewBox="0 0 280 85" style="width: 100%; max-height: 90px; overflow: visible;">
+                <!-- Ponto Início com Estrela Amarela e Explorador -->
+                <circle cx="28" cy="42" r="18" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2.5" />
+                <text x="28" y="47" font-size="18" text-anchor="middle">⭐</text>
+                <text x="28" y="75" font-size="9" font-weight="800" fill="#0284C7" text-anchor="middle">INÍCIO</text>
+
+                <!-- Caminho ondulado pontilhado -->
+                <path d="M 48 42 C 78 12, 102 72, 136 42 C 170 12, 194 72, 228 42" stroke="#0284C7" stroke-width="3.5" stroke-dasharray="6 5" fill="none" />
+
+                <!-- Ponto Chegada com Cenoura -->
+                <circle cx="248" cy="42" r="18" fill="#FFEDD5" stroke="#EA580C" stroke-width="2.5" />
+                <text x="248" y="48" font-size="18" text-anchor="middle">🥕</text>
+                <text x="248" y="75" font-size="9" font-weight="800" fill="#EA580C" text-anchor="middle">CHEGADA</text>
+              </svg>
+
+              <!-- Banner coral: AGORA É SUA VEZ! -->
+              <div style="background: #EA580C; color: #FFF; font-family: var(--font-heading); font-size: 0.74rem; font-weight: 800; padding: 0.35rem 0.8rem; border-radius: 8px; margin: 0.6rem auto 0.4rem; max-width: 190px; letter-spacing: 0.03em;">
+                AGORA É SUA VEZ!
+              </div>
+
+              <!-- Quadro de desenho embaixo -->
+              <div style="border: 2px dashed #93C5FD; background: #FFFFFF; border-radius: 12px; height: 55px; display: flex; align-items: center; justify-content: center; color: #64748B; font-size: 0.72rem; font-weight: 700;">
+                ✏️ Desenhe o seu próprio caminho aqui
+              </div>
+            </div>
+          `
+        },
+        {
+          groupName: "GRUPO 2 • AMARELO",
+          themeClass: "theme-yellow",
+          groupNum: "2",
+          groupLabel: "Letras e Linguagem",
+          instruction: "Encontre e circule todas as letras A na grade! Depois pratique o traçado na linha de treino.",
+          title: "Caça à Letra 'A' e Escrita",
+          desc: "Letra A grande no topo para reconhecimento imediato, grade 3x3 de letras para circular todos os 'A' e linha de escrita/traçado 'A a a'.",
+          skill: "reconhecimento das letras",
+          visualHtml: `
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+              <!-- Letra A grande no topo -->
+              <div style="font-family: var(--font-heading); font-size: 3.2rem; font-weight: 800; color: #D97706; line-height: 1; border: 3px solid #FCD34D; background: #FEF3C7; border-radius: 14px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem;">
+                A
+              </div>
+
+              <!-- Grade 3x3 de letras para circular os A -->
+              <div style="display: grid; grid-template-columns: repeat(3, 40px); gap: 6px; margin-bottom: 0.7rem;">
+                <div style="border: 2.5px solid #F59E0B; background: #FFFBEB; border-radius: 8px; font-weight: 800; font-size: 1.1rem; color: #D97706; padding: 4px; box-shadow: 0 0 0 2px #FDE68A;">A</div>
+                <div style="border: 2px solid #E2E8F0; background: #FFF; border-radius: 8px; font-weight: 800; font-size: 1.1rem; color: #64748B; padding: 4px;">B</div>
+                <div style="border: 2.5px solid #F59E0B; background: #FFFBEB; border-radius: 8px; font-weight: 800; font-size: 1.1rem; color: #D97706; padding: 4px; box-shadow: 0 0 0 2px #FDE68A;">A</div>
+                
+                <div style="border: 2px solid #E2E8F0; background: #FFF; border-radius: 8px; font-weight: 800; font-size: 1.1rem; color: #64748B; padding: 4px;">E</div>
+                <div style="border: 2.5px solid #F59E0B; background: #FFFBEB; border-radius: 8px; font-weight: 800; font-size: 1.1rem; color: #D97706; padding: 4px; box-shadow: 0 0 0 2px #FDE68A;">A</div>
+                <div style="border: 2px solid #E2E8F0; background: #FFF; border-radius: 8px; font-weight: 800; font-size: 1.1rem; color: #64748B; padding: 4px;">O</div>
+                
+                <div style="border: 2px solid #E2E8F0; background: #FFF; border-radius: 8px; font-weight: 800; font-size: 1.1rem; color: #64748B; padding: 4px;">M</div>
+                <div style="border: 2px solid #E2E8F0; background: #FFF; border-radius: 8px; font-weight: 800; font-size: 1.1rem; color: #64748B; padding: 4px;">P</div>
+                <div style="border: 2.5px solid #F59E0B; background: #FFFBEB; border-radius: 8px; font-weight: 800; font-size: 1.1rem; color: #D97706; padding: 4px; box-shadow: 0 0 0 2px #FDE68A;">A</div>
+              </div>
+
+              <!-- Linha de treino de escrita -->
+              <div style="background: #FFFFFF; border: 2px dashed #F59E0B; border-radius: 10px; width: 100%; padding: 0.35rem 0.6rem; font-size: 0.78rem; font-weight: 800; color: #92400E; display: flex; align-items: center; justify-content: space-between;">
+                <span>Escreva ou trace a letra:</span>
+                <span style="font-family: var(--font-heading); font-size: 1.1rem; letter-spacing: 0.2em; color: #D97706;">A a a</span>
+              </div>
+            </div>
+          `
+        },
+        {
+          groupName: "GRUPO 3 • VERDE",
+          themeClass: "theme-green",
+          groupNum: "3",
+          groupLabel: "Números e Quantidades",
+          instruction: "Quantos peixinhos nadam no aquário? Conte no dedinho, circule o número e desenhe no quadro!",
+          title: "Contagem de Peixinhos no Aquário",
+          desc: "Figuras de peixinhos para contar, três opções de número para circular (8, 9, 10) e quadro 'DESENHE AQUI' para registrar a quantidade.",
+          skill: "contagem e quantidades",
+          visualHtml: `
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+              <!-- Figuras de peixinhos para contar (9 peixinhos) -->
+              <div style="background: #ECFDF5; border: 2.5px solid #A7F3D0; border-radius: 14px; padding: 0.5rem 0.6rem; width: 100%; margin-bottom: 0.6rem;">
+                <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; font-size: 1.35rem;">
+                  <span>🐟</span><span>🐠</span><span>🐟</span><span>🐠</span><span>🐟</span>
+                  <span>🐠</span><span>🐟</span><span>🐠</span><span>🐟</span>
+                </div>
+                <div style="font-size: 0.68rem; font-weight: 800; color: #065F46; margin-top: 3px;">
+                  Quantos peixinhos você contou?
+                </div>
+              </div>
+
+              <!-- Três opções de número para circular: 8, 9, 10 -->
+              <div style="display: flex; gap: 14px; margin-bottom: 0.6rem;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid #CBD5E1; background: #FFF; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; color: #64748B;">8</div>
+                <div style="width: 44px; height: 44px; border-radius: 50%; border: 3px solid #16A34A; background: #DCFCE7; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 1.45rem; font-weight: 800; color: #166534; box-shadow: 0 0 0 3px #86EFAC;">9</div>
+                <div style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid #CBD5E1; background: #FFF; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; color: #64748B;">10</div>
+              </div>
+
+              <!-- Quadro DESENHE AQUI -->
+              <div style="border: 2px dashed #16A34A; background: #FFFFFF; border-radius: 10px; width: 100%; padding: 0.4rem; font-size: 0.72rem; font-weight: 800; color: #15803D;">
+                QUADRO: DESENHE AQUI A MESMA QUANTIDADE
+              </div>
+            </div>
+          `
+        },
+        {
+          groupName: "GRUPO 4 • CORAL",
+          themeClass: "theme-coral",
+          groupNum: "4",
+          groupLabel: "Formas e Sequências",
+          instruction: "Descubra qual forma completa o mistério! Depois, use sua imaginação para criar a sua própria sequência.",
+          title: "Sequência de Padrões e Lógica Visual",
+          desc: "Sequência de padrão círculo-quadrado-círculo-quadrado com lacunas '?' para dedução lógica e quadro 'CRIE UMA SEQUÊNCIA SUA'.",
+          skill: "padrões e lógica visual",
+          visualHtml: `
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+              <!-- Sequência círculo-quadrado-círculo-quadrado com lacunas ? -->
+              <div style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-bottom: 0.8rem; flex-wrap: wrap;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: #FFEDD5; border: 3px solid #EA580C; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">⭕</div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #EA580C; border: 2.5px solid #C2410C; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #FFF;">■</div>
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: #FFEDD5; border: 3px solid #EA580C; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">⭕</div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #EA580C; border: 2.5px solid #C2410C; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #FFF;">■</div>
+                <!-- Lacuna com ? -->
+                <div style="width: 40px; height: 40px; border-radius: 50%; border: 3px dashed #EA580C; background: #FFF7ED; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 1.3rem; font-weight: 800; color: #EA580C; box-shadow: 0 0 0 3px #FED7AA;">?</div>
+              </div>
+
+              <!-- Quadro CRIE UMA SEQUÊNCIA SUA -->
+              <div style="border: 2.5px dashed #F97316; background: #FFFFFF; border-radius: 12px; width: 100%; padding: 0.7rem 0.5rem; text-align: center;">
+                <div style="font-family: var(--font-heading); font-weight: 800; font-size: 0.78rem; color: #C2410C; margin-bottom: 0.35rem;">
+                  CRIE UMA SEQUÊNCIA SUA
+                </div>
+                <div style="display: flex; justify-content: center; gap: 8px;">
+                  <div style="width: 32px; height: 32px; border: 1.5px dashed #CBD5E1; border-radius: 6px;"></div>
+                  <div style="width: 32px; height: 32px; border: 1.5px dashed #CBD5E1; border-radius: 6px;"></div>
+                  <div style="width: 32px; height: 32px; border: 1.5px dashed #CBD5E1; border-radius: 6px;"></div>
+                  <div style="width: 32px; height: 32px; border: 1.5px dashed #CBD5E1; border-radius: 6px;"></div>
+                </div>
+              </div>
+            </div>
+          `
+        },
+        {
+          groupName: "GRUPO 5 • ROXO",
+          themeClass: "theme-purple",
+          groupNum: "5",
+          groupLabel: "Atenção e Lógica",
+          instruction: "Olhe com muita atenção! Qual das quatro figuras é diferente das outras? Depois ligue os pares que combinam.",
+          title: "Qual Figura É Diferente? e Ligue os Pares",
+          desc: "Quatro figuras numeradas de 1 a 4 com a pergunta 'Qual figura é diferente?' e seção complementar 'LIGUE OS PARES'.",
+          skill: "atenção aos detalhes",
+          visualHtml: `
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+              <div style="font-size: 0.76rem; font-weight: 800; color: #6D28D9; margin-bottom: 0.45rem;">
+                Qual figura é diferente? (1 a 4)
+              </div>
+              
+              <!-- Quatro figuras numeradas 1 a 4 -->
+              <div style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 0.7rem;">
+                <div style="border: 2px solid #DDD6FE; background: #FFF; border-radius: 10px; padding: 4px; width: 48px; text-align: center;">
+                  <span style="font-size: 0.65rem; font-weight: 800; color: #7C3AED; display: block;">1</span>
+                  <span style="font-size: 1.3rem;">⭐</span>
+                </div>
+                <div style="border: 2px solid #DDD6FE; background: #FFF; border-radius: 10px; padding: 4px; width: 48px; text-align: center;">
+                  <span style="font-size: 0.65rem; font-weight: 800; color: #7C3AED; display: block;">2</span>
+                  <span style="font-size: 1.3rem;">⭐</span>
+                </div>
+                <div style="border: 2.5px dashed #7C3AED; background: #F3E8FF; border-radius: 10px; padding: 4px; width: 48px; text-align: center; box-shadow: 0 0 0 2px #C4B5FD;">
+                  <span style="font-size: 0.65rem; font-weight: 800; color: #6D28D9; display: block;">3</span>
+                  <span style="font-size: 1.3rem;">🌙</span>
+                </div>
+                <div style="border: 2px solid #DDD6FE; background: #FFF; border-radius: 10px; padding: 4px; width: 48px; text-align: center;">
+                  <span style="font-size: 0.65rem; font-weight: 800; color: #7C3AED; display: block;">4</span>
+                  <span style="font-size: 1.3rem;">⭐</span>
+                </div>
+              </div>
+
+              <!-- Seção LIGUE OS PARES -->
+              <div style="background: #FFFFFF; border: 2px solid #C4B5FD; border-radius: 12px; width: 100%; padding: 0.45rem 0.6rem;">
+                <div style="font-family: var(--font-heading); font-size: 0.72rem; font-weight: 800; color: #6D28D9; margin-bottom: 0.3rem;">
+                  LIGUE OS PARES
+                </div>
+                <div style="display: flex; justify-content: space-around; font-size: 1rem;">
+                  <span>🧦 ➔ 🧦</span>
+                  <span>🧤 ➔ 🧤</span>
+                </div>
+              </div>
+            </div>
+          `
+        },
+        {
+          groupName: "GRUPO 6 • ROSA",
+          themeClass: "theme-pink",
+          groupNum: "6",
+          groupLabel: "Brincadeiras Criativas",
+          instruction: "Chegou a sua hora de ser artista! Crie uma invenção ou criatura especial e dê um nome incrível para ela.",
+          title: "Hora de Inventar e Criar",
+          desc: "Título inspirador 'Hora de inventar!', com espaço generoso para desenho livre e campo para a criança dar um nome à sua obra.",
+          skill: "criatividade e expressão",
+          visualHtml: `
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+              <!-- Título "Hora de inventar!" -->
+              <div style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: #BE185D; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.35rem;">
+                <span>✨</span> Hora de inventar! <span>🎨</span>
+              </div>
+
+              <!-- Espaço grande de desenho -->
+              <div style="border: 3px dashed #F472B6; background: #FDF2F8; border-radius: 14px; width: 100%; height: 95px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #BE185D; margin-bottom: 0.55rem; padding: 0.5rem;">
+                <span style="font-size: 1.5rem; margin-bottom: 2px;">🖍️ 🚀 🌈</span>
+                <span style="font-size: 0.72rem; font-weight: 800;">Espaço livre para desenhar, colar ou colorir</span>
+              </div>
+
+              <!-- Campo "Meu desenho se chama:" -->
+              <div style="background: #FFFFFF; border: 2px solid #FBCFE8; border-radius: 10px; width: 100%; padding: 0.45rem 0.75rem; display: flex; align-items: center; gap: 0.5rem; text-align: left;">
+                <span style="font-weight: 800; font-size: 0.74rem; color: #9D174D; white-space: nowrap;">Meu desenho se chama:</span>
+                <div style="flex: 1; border-bottom: 2px solid #F472B6; height: 14px;"></div>
+              </div>
+            </div>
+          `
+        }
+      ];
+
+      let currentSlide = 0;
+      const tabBtns = document.querySelectorAll('.preview-tab-btn');
+      const navIndicator = document.getElementById('navIndicator');
+      const stageCard = document.getElementById('stageCard');
+      const stageCanvas = document.getElementById('stageCanvas');
+      const stageGroupTag = document.getElementById('stageGroupTag');
+      const stageTitle = document.getElementById('stageTitle');
+      const stageDesc = document.getElementById('stageDesc');
+      const stageSkill = document.getElementById('stageSkill');
+      const prevBtn = document.getElementById('prevSlideBtn');
+      const nextBtn = document.getElementById('nextSlideBtn');
+
+      function renderSlide(index, animate = true) {
+        if (index < 0) index = previewData.length - 1;
+        if (index >= previewData.length) index = 0;
+        currentSlide = index;
+
+        // Atualiza botões das abas
+        tabBtns.forEach((btn, idx) => {
+          const isActive = idx === currentSlide;
+          btn.classList.toggle('active', isActive);
+          btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+
+        // Indicador 1 de 6
+        if (navIndicator) {
+          navIndicator.textContent = `${currentSlide + 1} de ${previewData.length}`;
+        }
+
+        const data = previewData[currentSlide];
+
+        if (animate && stageCard) {
+          stageCard.style.opacity = '0.4';
+          stageCard.style.transform = 'translateY(6px)';
+        }
+
+        setTimeout(() => {
+          if (stageGroupTag) stageGroupTag.textContent = data.groupName;
+          if (stageTitle) stageTitle.textContent = data.title;
+          if (stageDesc) stageDesc.textContent = data.desc;
+          if (stageSkill) stageSkill.textContent = data.skill;
+
+          if (stageCanvas) {
+            // Remove previous theme classes and apply current
+            stageCanvas.className = `sheet-big-canvas ${data.themeClass}`;
+            stageCanvas.innerHTML = `
+              <div class="sheet-big-header">
+                <span style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span class="group-num-badge">${data.groupNum}</span>
+                  ${data.groupLabel}
+                </span>
+                <span style="font-size: 0.72rem; opacity: 0.95; background: rgba(0,0,0,0.12); padding: 0.2rem 0.5rem; border-radius: 6px;">Página Real</span>
+              </div>
+
+              <!-- Balão de fala do mascote explorador com a instrução -->
+              <div class="mascot-speech-bubble">
+                <div class="mascot-bubble-avatar" aria-hidden="true">🤠</div>
+                <div class="mascot-bubble-text">
+                  <strong>Mascote Explorador diz:</strong> "${data.instruction}"
+                </div>
+              </div>
+
+              <div class="sheet-inner-drawing">
+                ${data.visualHtml}
+              </div>
+            `;
+          }
+
+          if (animate && stageCard) {
+            stageCard.style.opacity = '1';
+            stageCard.style.transform = 'translateY(0)';
+          }
+        }, animate ? 120 : 0);
+      }
+
+      // Inicializa o primeiro slide
+      renderSlide(0, false);
+
+      // Event listeners para as abas
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.getAttribute('data-index'), 10);
+          renderSlide(idx, true);
+        });
+      });
+
+      // Navegação por setas
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          renderSlide(currentSlide - 1, true);
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          renderSlide(currentSlide + 1, true);
+        });
+      }
+
+      // Suporte a swipe simples no stageCard em mobile
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      if (stageCard) {
+        stageCard.addEventListener('touchstart', (e) => {
+          touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        stageCard.addEventListener('touchend', (e) => {
+          touchEndX = e.changedTouches[0].screenX;
+          const diff = touchEndX - touchStartX;
+          if (Math.abs(diff) > 40) {
+            if (diff < 0) {
+              renderSlide(currentSlide + 1, true);
+            } else {
+              renderSlide(currentSlide - 1, true);
+            }
+          }
+        }, { passive: true });
+      }
+    });
+
+    function handleCheckoutClick(e) {
+      // Keep smooth anchor navigation or trigger mock checkout feedback
+      const target = document.querySelector('#checkout');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  </script>
+<script>
+/* Skip artifact shell — fixed helpers served beside every artifact. */
+(function () {
+  "use strict";
+
+  var fmt = {
+    num: function (v, opts) { return new Intl.NumberFormat("pt-BR", opts || {}).format(v); },
+    brl: function (v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v); },
+    pct: function (v) { return new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 1 }).format(v); }
+  };
+
+  // axisFmt keeps axis tick labels short (compact notation) so long values
+  // (e.g. full BRL amounts) never clip against the plot edge.
+  function axisFmt(v) {
+    return fmt.num(v, { notation: "compact", maximumFractionDigits: 1 });
+  }
+
+  // format accepts a function OR one of the fmt names ("num" | "brl" | "pct").
+  function coerceFormat(spec) {
+    if (typeof spec === "function") return spec;
+    if (typeof spec === "string" && fmt[spec]) return fmt[spec];
+    return function (v) { return fmt.num(v); };
+  }
+
+  function accent() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2563eb";
+  }
+  function mutedColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim() || "#5b6472";
+  }
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+  function frame(el, w, h) {
+    var svg = svgEl("svg", { viewBox: "0 0 " + w + " " + h, role: "img" });
+    el.innerHTML = "";
+    el.appendChild(svg);
+    return svg;
+  }
+
+  // maxOf guards the axis scale: empty values would give -Infinity (truthy,
+  // so "|| 1" can't catch it) and a non-positive max would flip the chart.
+  function maxOf(values) {
+    var m = values.length ? Math.max.apply(null, values) : 0;
+    return m > 0 ? m : 1;
+  }
+
+  // bar(el, {labels:[], values:[], color?, format?}) — vertical bar chart.
+  function bar(el, cfg) {
+    var W = 640, H = 280, padL = 46, padB = 30, padT = 12;
+    var svg = frame(el, W, H);
+    var max = maxOf(cfg.values);
+    var n = cfg.values.length;
+    var plotW = W - padL - 12, plotH = H - padT - padB;
+    var step = plotW / n, bw = Math.min(step * 0.62, 64);
+    var color = cfg.color || accent();
+    var f = coerceFormat(cfg.format);
+    for (var g = 0; g <= 4; g++) {
+      var gy = padT + plotH - (plotH * g) / 4;
+      svg.appendChild(svgEl("line", { x1: padL, y1: gy, x2: W - 12, y2: gy, stroke: "currentColor", "stroke-opacity": 0.08 }));
+      var lbl = svgEl("text", { x: padL - 8, y: gy + 4, "text-anchor": "end", "font-size": 10, fill: mutedColor() });
+      lbl.textContent = axisFmt((max * g) / 4);
+      svg.appendChild(lbl);
+    }
+    cfg.values.forEach(function (v, i) {
+      var bh = Math.max(0, (v / max) * plotH);
+      var x = padL + i * step + (step - bw) / 2;
+      var y = padT + plotH - bh;
+      var r = svgEl("rect", { x: x, y: y, width: bw, height: bh, rx: 4, fill: color });
+      var t = svgEl("title", {});
+      t.textContent = cfg.labels[i] + ": " + f(v);
+      r.appendChild(t);
+      svg.appendChild(r);
+      var tx = svgEl("text", { x: x + bw / 2, y: H - 10, "text-anchor": "middle", "font-size": 11, fill: mutedColor() });
+      tx.textContent = cfg.labels[i];
+      svg.appendChild(tx);
+    });
+  }
+
+  // line(el, {labels:[], values:[], color?, format?}) — single-series line.
+  function line(el, cfg) {
+    var W = 640, H = 280, padL = 46, padB = 30, padT = 12;
+    var svg = frame(el, W, H);
+    var max = maxOf(cfg.values);
+    var n = cfg.values.length;
+    var plotW = W - padL - 16, plotH = H - padT - padB;
+    var color = cfg.color || accent();
+    var f = coerceFormat(cfg.format);
+    for (var g = 0; g <= 4; g++) {
+      var gy = padT + plotH - (plotH * g) / 4;
+      svg.appendChild(svgEl("line", { x1: padL, y1: gy, x2: W - 16, y2: gy, stroke: "currentColor", "stroke-opacity": 0.08 }));
+      var lbl = svgEl("text", { x: padL - 8, y: gy + 4, "text-anchor": "end", "font-size": 10, fill: mutedColor() });
+      lbl.textContent = axisFmt((max * g) / 4);
+      svg.appendChild(lbl);
+    }
+    var pts = cfg.values.map(function (v, i) {
+      var x = padL + (n === 1 ? plotW / 2 : (plotW * i) / (n - 1));
+      var y = padT + plotH - (v / max) * plotH;
+      return [x, y];
+    });
+    var d = pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
+    svg.appendChild(svgEl("path", { d: d, fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }));
+    pts.forEach(function (p, i) {
+      var c = svgEl("circle", { cx: p[0], cy: p[1], r: 3.5, fill: color });
+      var t = svgEl("title", {});
+      t.textContent = cfg.labels[i] + ": " + f(cfg.values[i]);
+      c.appendChild(t);
+      svg.appendChild(c);
+      var tx = svgEl("text", { x: p[0], y: H - 10, "text-anchor": "middle", "font-size": 11, fill: mutedColor() });
+      tx.textContent = cfg.labels[i];
+      svg.appendChild(tx);
+    });
+  }
+
+  // donut(el, {labels:[], values:[], colors?}) — donut with center total.
+  function donut(el, cfg) {
+    var W = 320, H = 280, cx = W / 2, cy = H / 2, R = 92, r = 58;
+    var svg = frame(el, W, H);
+    var total = cfg.values.reduce(function (a, b) { return a + b; }, 0) || 1;
+    var palette = cfg.colors || [accent(), "#1baf7a", "#eda100", "#e34948", "#4a3aa7", "#e87ba4"];
+    var a0 = -Math.PI / 2;
+    cfg.values.forEach(function (v, i) {
+      var a1 = a0 + (v / total) * Math.PI * 2;
+      var large = a1 - a0 > Math.PI ? 1 : 0;
+      var p = ["M", cx + R * Math.cos(a0), cy + R * Math.sin(a0),
+        "A", R, R, 0, large, 1, cx + R * Math.cos(a1), cy + R * Math.sin(a1),
+        "L", cx + r * Math.cos(a1), cy + r * Math.sin(a1),
+        "A", r, r, 0, large, 0, cx + r * Math.cos(a0), cy + r * Math.sin(a0), "Z"].join(" ");
+      var path = svgEl("path", { d: p, fill: palette[i % palette.length] });
+      var t = svgEl("title", {});
+      t.textContent = cfg.labels[i] + ": " + fmt.num(v) + " (" + fmt.pct(v / total) + ")";
+      path.appendChild(t);
+      svg.appendChild(path);
+      a0 = a1;
+    });
+    var center = svgEl("text", { x: cx, y: cy + 5, "text-anchor": "middle", "font-size": 20, "font-weight": 650, fill: "currentColor" });
+    center.textContent = fmt.num(total);
+    svg.appendChild(center);
+  }
+
+  window.skipShell = { fmt: fmt };
+  window.skipChart = { bar: bar, line: line, donut: donut };
+})();
+
+</script>
+</body>
+</html>
